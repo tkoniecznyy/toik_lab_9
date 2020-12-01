@@ -29,33 +29,50 @@ public class MovieApiController {
         movies = new MovieListDto(moviesList);
     }
 
-    @GetMapping("/movies")
+    @CrossOrigin
+    @RequestMapping(value = "/movies/getAll", method = RequestMethod.GET)
     public ResponseEntity<MovieListDto> getMovies() {
         LOG.info("--- get all movies: {}", movies);
         return ResponseEntity.ok().body(movies);    // = new ResponseEntity<>(movies, HttpStatus.OK);
     }
 
-    @GetMapping("/movies/{id}/title/{title}")
-    public ResponseEntity<Void> getMovie(@PathVariable("id") Integer id, @PathVariable("title") String title) {
-        LOG.info("--- id: {}", id);
-        LOG.info("--- title: {}", title);
-
+    @CrossOrigin
+    @RequestMapping(value = "/movies/add", method = RequestMethod.POST)
+    public ResponseEntity<Void> newMovie(@RequestBody MovieDto newMovie) {
+        LOG.info("Film added");
+        movies.getMovies().add(newMovie);
         return ResponseEntity.ok().build();
     }
 
-    @PutMapping("/movies")
-    public ResponseEntity<Void> updateMovie(@RequestParam("id") Integer id, @RequestParam("title") String title) {
-        LOG.info("--- id: {}", id);
-        LOG.info("--- title: {}", title);
-
+    @CrossOrigin
+    @RequestMapping(value = "/movies/update", method = RequestMethod.PUT)
+    public ResponseEntity<Void> updateMovie(@RequestParam("id") Integer id, @RequestBody MovieDto updatedMovie) {
+        for (int i = 0; i < movies.getMovies().size(); i++) {
+            if (id == movies.getMovies().get(i).getMovieId() + 1) {
+                LOG.info("Updated movie - id: {}", id);
+                movies.getMovies().add(updatedMovie);
+                movies.getMovies().remove(i);
+                return ResponseEntity.ok().build();
+            } else {
+                return ResponseEntity.badRequest().build();
+            }
+        }
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/movies")
-    public ResponseEntity<Void> createMovie(@RequestBody CreateMovieDto createMovieDto) throws URISyntaxException {
-        LOG.info("--- id: {}", createMovieDto.getMovieId());
-        LOG.info("--- title: {}", createMovieDto.getTitle());
-
-        return ResponseEntity.created(new URI("/movies/" + createMovieDto.getMovieId())).build();
+    @CrossOrigin
+    @RequestMapping(value = "/movies/delete", method = RequestMethod.DELETE)
+    public ResponseEntity<Void> deleteMovie(@RequestParam Integer id) {
+        for (int i = 0; i < movies.getMovies().size(); i++) {
+            if (id == movies.getMovies().get(i).getMovieId() + 1) {
+                LOG.info("deleted movie --- id: {}", id);
+                movies.getMovies().remove(i);
+                return ResponseEntity.ok().build();
+            } else {
+                return ResponseEntity.badRequest().build();
+            }
+        }
+        return ResponseEntity.badRequest().build();
     }
 }
+
